@@ -3,34 +3,40 @@
 <script type="text/javascript">
 function convertN() {
     var source = document.getElementById("char-text").value;
-    var result = source.split('').map(c => "&#" + c.charCodeAt(0) + ";").join('');
+    var f = c => {
+        var ch = c.charCodeAt(0);
+        return ch <= 127 ? c : ("&#" + ch + ";");
+    };
+    var result = source.split('').map(f).join('');
     document.getElementById('code-text').value = result;
 }
 function convertR() {
-    var codeTextToChar = function(s) {
-        if (s.length > 2 && s[0] == '&' && s[1] == '#') {
-            var r = parseInt(s.substring(2));
-            return Number.isNaN(r) ? null : String.fromCharCode(r);
-        }
-        return null;
-    };
-    var source = document.getElementById("code-text").value.split(';');
+    var source = document.getElementById("code-text").value;
+    var len = source.length;
+    var pos = 0;
     var rarray = [];
-    var error = false;
-    for (var i = 0; i < source.length; i++) {
-        var c = source[i];
-        if (c == '') {
-            continue;       // splitした結果として空文字列が来たら除去
+    while (pos < len) {
+        if (pos < len - 4 && source[pos] == '&' && source[pos + 1] == '#') {
+            // &#で始まっているなら;までを切り出す。見つからなかったらエラー。
+            // 切り出したものを変換できなかったらエラー。
+            // &#で始まっていないならそのまま1文字切り出す。
+            var target = source.indexOf(';', pos);
+            if (target == -1) {
+                break;
+            }
+            var r = parseInt(source.substring(pos + 2, target));
+            if (Number.isNaN(r)) {
+                break;
+            }
+            rarray.push(String.fromCharCode(r));
+            pos += target - pos + 1;
+        } else {
+            rarray.push(source[pos]);
+            pos++;
         }
-        var r = codeTextToChar(c);
-        if (r == null) {
-            error = true;
-            break;
-        }
-        rarray.push(r);
     }
     var e = document.getElementById('char-text');
-    if (error) {
+    if (pos < len) {
         e.style.backgroundColor = 'pink';
         e.value = rarray.join('') + "// (convert error)";
     } else {
