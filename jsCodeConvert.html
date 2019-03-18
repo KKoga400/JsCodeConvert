@@ -1,0 +1,89 @@
+<html>
+<head>
+<script type="text/javascript">
+function convertN() {
+    var source = document.getElementById("char-text").value;
+    var result = source.split('').map(c => "&#" + c.charCodeAt(0) + ";").join('');
+    document.getElementById('code-text').value = result;
+}
+function convertR() {
+    var codeTextToChar = function(s) {
+        if (s.length > 2 && s[0] == '&' && s[1] == '#') {
+            var r = parseInt(s.substring(2));
+            return Number.isNaN(r) ? null : String.fromCharCode(r);
+        }
+        return null;
+    };
+    var source = document.getElementById("code-text").value.split(';');
+    var rarray = [];
+    var error = false;
+    for (var i = 0; i < source.length; i++) {
+        var c = source[i];
+        if (c == '') {
+            continue;       // splitした結果として空文字列が来たら除去
+        }
+        var r = codeTextToChar(c);
+        if (r == null) {
+            error = true;
+            break;
+        }
+        rarray.push(r);
+    }
+    var e = document.getElementById('char-text');
+    if (error) {
+        e.style.backgroundColor = 'pink';
+        e.value = rarray.join('') + "// (convert error)";
+    } else {
+        e.style.backgroundColor = '';
+        e.value = rarray.join('');
+    }
+}
+</script>
+<style type="text/css">
+div#container {
+    width: 50em;
+    border: solid 1px gray;
+    padding: 10px;
+}
+textarea#char-text {
+    width: 100%;
+    height: 30%;
+    border: dotted 1px gray;
+}
+div#buttonarea {
+    text-align: center;
+}
+input#code-text {
+    width: 40%;
+    margin: 1em 2em;
+}
+textarea#code-text {
+    width: 100%;
+    height: 30%;
+    border: dotted 1px gray;
+}
+</style>
+</head>
+<body>
+<div id="container">
+文字コード表現の相互変換
+<hr/>
+
+文字列<br/>
+<textarea id="char-text">
+サンプルの文字列
+</textarea>
+
+<div id="buttonarea">
+<input id="convert" type="button" value="文字コードに変換↓" onclick="convertN()"/>
+<input id="convert" type="button" value="文字列に変換↑" onclick="convertR()"/>
+</div>
+
+文字コード<br/>
+<textarea id="code-text">
+</textarea>
+
+</div>
+</body>
+</html
+
